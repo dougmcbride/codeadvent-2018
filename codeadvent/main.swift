@@ -1,37 +1,31 @@
 import Foundation
 
-struct Input {
-    let intValue: Int
+var totalTwos = 0
+var totalThrees = 0
 
-    init(_ s: String) {
-        let negative = s.starts(with: "-")
-        let multiplier = negative ? -1 : 1
-        intValue = Int(s.dropFirst(1))! * multiplier
-    }
-}
+while let idString = readLine(strippingNewline: true) {
+    var hasTwo = false
+    var hasThree = false
+    
+    let countedLetterSet = NSCountedSet(array: Array(idString))
 
-var inputs = [Input]()
-var seen = Set<Int>()
-var current = 0
-var result: Int?
-
-while let inString = readLine(strippingNewline: true) {
-    inputs.append(Input(inString))
-}
-
-while result == nil {
-    for input in inputs {
-        seen.insert(current)
-        print(seen)
-
-        current += input.intValue
-
-        if seen.contains(current) {
-            result = current
+    nextSet: for letter in countedLetterSet.objectEnumerator() {
+        switch countedLetterSet.count(for: letter) {
+        case 2: hasTwo = true
+        case 3: hasThree = true
+        default: break
+        }
+        
+        if hasTwo && hasThree {
             break
         }
     }
+    
+    totalTwos += hasTwo ? 1 : 0
+    totalThrees += hasThree ? 1 : 0
 }
 
-print("answer: \(result!)")
+print("2's: \(totalTwos)")
+print("3's: \(totalThrees)")
+print("answer: \(totalTwos * totalThrees)")
         
