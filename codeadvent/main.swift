@@ -17,52 +17,48 @@ struct Claim {
     }
 }
 
-enum ClaimStatus {
-    case unclaimed, claimed, overClaimed
+extension Claim: Hashable {
+    static func ==(lhs: Claim, rhs: Claim) -> Bool {
+        return lhs.id == rhs.id
+    }
+    public var hashValue: Int {
+        return id
+    }
 }
+
+//enum ClaimStatus {
+//    case unclaimed, claimed, overClaimed
+//}
 
 func main(lines: [String]) {
     let size = 1000
-    var grid: [[ClaimStatus]] = Array(repeating: Array(repeating: .unclaimed,
-                                                       count: size),
-                                      count: size)
+    var grid: [[Set<Claim>]] = Array(repeating: Array(repeating: [], count: size),
+                                     count: size)
 
-    let claims = lines.map { Claim(claimString: $0) }
+    var claims = Set<Claim>(lines.map { Claim(claimString: $0) })
 
-    var overClaimed = 0
     for claim in claims {
-        for x in claim.x..<(claim.x + claim.w) {
-            for y in claim.y..<(claim.y + claim.h) {
-                let newSquare: ClaimStatus
-                switch grid[x][y] {
-                case .unclaimed:
-                    newSquare = .claimed
-                case .claimed:
-                    overClaimed += 1
-                    newSquare = .overClaimed
-                case .overClaimed:
-                    newSquare = .overClaimed
+        for xd in 0..<claim.w {
+            for yd in 0..<claim.h {
+                let x = claim.x + xd
+                let y = claim.y + yd
+                grid[x][y].insert(claim)
+
+                if grid[x][y].count > 1 {
+                    claims.subtract(grid[x][y])
                 }
-                grid[x][y] = newSquare
             }
         }
     }
 
-    print(overClaimed)
+    print(claims)
 }
 
 //var ids = [String]()
 //var lines = [
-//    "#1 @ 861,330: 20x10",
-//    "#2 @ 491,428: 28x23",
-//    "#3 @ 64,746: 20x27",
-//    "#4 @ 406,769: 25x28",
-//    "#5 @ 853,621: 17x26",
-//    "#6 @ 311,802: 27x28",
-//    "#7 @ 947,977: 14x13",
-//    "#8 @ 786,5: 18x23",
-//    "#9 @ 420,429: 14x24",
-//    "#10 @ 138,206: 29x28",
+//"#1 @ 1,3: 4x4",
+//"#2 @ 3,1: 4x4",
+//"#3 @ 5,5: 2x2",
 //]
 
 var lines = [String]()
