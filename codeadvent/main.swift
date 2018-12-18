@@ -1,40 +1,41 @@
 import Foundation
 
-extension Substring {
+extension Character {
     private var uppercased: Bool {
-        return self == self.uppercased()
+        let s = String(self)
+        return s == s.uppercased()
     }
 
-    func reacts(with other: Substring) -> Bool {
-        return other.uppercased() == self.uppercased() && other.uppercased != uppercased
+    func reacts(with other: Character) -> Bool {
+        return String(other).uppercased() == String(self).uppercased() && other.uppercased != uppercased
     }
 }
 
-func main(polymer p: String) {
-    var polymer = p
-    var inert = true
-    var round = 1
+func main(polymer: String, removing type: Character) -> String.IndexDistance {
+    let removeString = String(type).uppercased()
+    var inert: Bool
+
+    var remainingStringIndices = Array(polymer.indices).filter {
+        removeString != String(polymer[$0]).uppercased()
+    }
 
     repeat {
-        print("round \(round)")
-        round += 1
         inert = true
 
-        for index in polymer.indices.dropLast().reversed() {
-            let index2 = polymer.index(after: index)
-            let index3 = polymer.index(after: index2)
-            let m1 = polymer[index..<index2]
-            let m2 = polymer[index2..<index3]
+        for index in remainingStringIndices.indices.reversed().dropFirst() {
+            guard index + 1 < remainingStringIndices.endIndex else { continue }
+            let m1 = polymer[remainingStringIndices[index]]
+            let m2 = polymer[remainingStringIndices[index + 1]]
 
             if m1.reacts(with: m2) {
-                polymer.remove(at: index)
-                polymer.remove(at: index)
+                remainingStringIndices.remove(at: index)
+                remainingStringIndices.remove(at: index)
                 inert = false
             }
         }
     } while !inert
 
-    print(polymer.count)
+    return remainingStringIndices.count
 }
 
 //var lines = [
@@ -49,4 +50,19 @@ let polymer = "CXxRrcWhHoOwWtTwSsRApPWwarlYyFWHhJjJjbBTsSQqtBTtbTtwfoEeivVTtIOLw
 //    lines.append(claimString)
 //}
 
-main(polymer: polymer)
+var minLength = Int.max
+var bestType: String!
+var seenTypes = Set<String>()
+
+for index in polymer.indices {
+    let type = String(polymer[index]).uppercased()
+    if seenTypes.contains(type) { continue }
+    seenTypes.insert(type)
+
+    let length = main(polymer: polymer, removing: polymer[index])
+    if length < minLength {
+        minLength = length
+    }
+}
+
+print(minLength)
