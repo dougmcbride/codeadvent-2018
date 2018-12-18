@@ -6,7 +6,7 @@ typealias Minute = Int
 func main(lines: [String]) {
     var allNaps = [Guard: [Range<Minute>]]()
 
-    var `guard`: Guard!
+    var whichGuard: Guard!
     var napStart: Minute!
     var napEnd: Minute!
 
@@ -22,52 +22,55 @@ func main(lines: [String]) {
             napStart = minute
         case "p":
             napEnd = minute
-            allNaps[`guard`]!.append(napStart..<napEnd)
+            allNaps[whichGuard]!.append(napStart..<napEnd)
         default:
             let endGuardIdIndex = line.range(of: " ", range: typeIndex..<line.endIndex)!
-            `guard` = Guard(line[typeIndex..<endGuardIdIndex.lowerBound])!
-            if !allNaps.keys.contains(`guard`) {
-                allNaps[`guard`] = [Range<Minute>]()
+            whichGuard = Guard(line[typeIndex..<endGuardIdIndex.lowerBound])!
+            if !allNaps.keys.contains(whichGuard) {
+                allNaps[whichGuard] = [Range<Minute>]()
             }
         }
     }
-    
-//    print(naps)
 
     var sleepiestGuard: Guard?
-    var maxMinutesSlept = 0
-    
-    for (guardId, naps) in allNaps {
-        let minutesSlept = naps.reduce(into: 0) { (result: inout Int, range: Range<Int>) in result += range.upperBound - range.lowerBound }
-        if minutesSlept > maxMinutesSlept {
-            maxMinutesSlept = minutesSlept
-            sleepiestGuard = guardId
-        }
-    }
-    
-    var minuteCounts: [Int] = Array(repeating: 0, count: 60)
-    for nap in allNaps[sleepiestGuard!]! {
-        for minute in nap.lowerBound..<nap.upperBound {
-            minuteCounts[minute] += 1
-        }
-    }
-    
     var sleepiestMinute: Minute?
     var maxTimes = 0
-    for minute in minuteCounts.indices {
-        if minuteCounts[minute] > maxTimes {
-            maxTimes = minuteCounts[minute]
-            sleepiestMinute = minute
+    var napMinuteCounts = [Guard: [Int]]()
+
+    for (whichGuard, naps) in allNaps {
+        var minuteCounts: [Int] = Array(repeating: 0, count: 60)
+
+        for nap in naps {
+            for minute in nap.lowerBound..<nap.upperBound {
+                minuteCounts[minute] += 1
+            }
+        }
+
+        napMinuteCounts[whichGuard] = minuteCounts
+//        
+//        let minutesSlept = naps.reduce(into: 0) { (result, range) in result += range.upperBound - range.lowerBound }
+//        if minutesSlept > maxMinutesSlept {
+//            maxMinutesSlept = minutesSlept
+//            sleepiestGuard = whichGuard
+//        }
+    }
+
+    for (whichGuard, minuteCounts) in napMinuteCounts {
+        for minute in minuteCounts.indices {
+            if minuteCounts[minute] > maxTimes {
+                maxTimes = minuteCounts[minute]
+                sleepiestGuard = whichGuard
+                sleepiestMinute = minute
+            }
         }
     }
-    
+
     print("sleepiest: \(sleepiestGuard!)")
     print("sleepiest: \(sleepiestMinute!)")
-    
+
     print(sleepiestMinute! * sleepiestGuard!)
 }
 
-//var ids = [String]()
 //var lines = [
 //    "[1518-11-01 00:00] Guard #10 begins shift",
 //    "[1518-11-01 00:05] falls asleep",
