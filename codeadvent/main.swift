@@ -1,130 +1,124 @@
 import Foundation
 
-struct Point: CustomDebugStringConvertible {
-    var debugDescription: String {
-        return "(\(x),\(y))"
+class Node: Hashable {
+    var hashValue: Int {
+        return name.hashValue
     }
-    let x, y: Int
-    func distance(to point: Point) -> Int {
-        return abs(point.x - x) + abs(point.y - y)
+
+    let name: String
+    var children = [Node]()
+
+    init(name: String) {
+        self.name = name
+    }
+
+    func addChild(_ parent: Node) {
+        children.append(parent)
+    }
+
+    func isParent(of maybeChildNode: Node) -> Bool {
+        return children.contains(maybeChildNode)
+    }
+
+    func isAncestor(of maybeChildNode: Node) -> Bool {
+        return isParent(of: maybeChildNode) ||
+               children.reduce(into: false) { result, testNode in
+                   let ancestor = testNode.isAncestor(of: maybeChildNode)
+                   if ancestor {
+                       print("\(self) is ancestor of \(testNode)")
+                   }
+                   result = result || ancestor
+               }
     }
 }
 
-extension Int {
-    var marker: String {
-        return String(Unicode.Scalar(65 + self)!)
-    }
-}
-
-extension Sequence {
-    func allSatisfy(_ block: (Element) -> Bool) -> Bool {
-        return self.reduce(into: true) { (result, element) in result = result && block(element) }
-    }
-}
-
-func main(points xys: [[Int]]) -> Int {
-    let points = xys.map { Point(x: $0.first!, y: $0.last!) }
-
-    let minX = points.map { $0.x }.min()!
-    let minY = points.map { $0.y }.min()!
-    let maxX = points.map { $0.x }.max()!
-    let maxY = points.map { $0.y }.max()!
-
-//    var closestPointCounts = [Int: Int]()
-//    var illegalPointIndexes = Set<Int>()
-    var count = 0
-
-    for y in minY...maxY {
-        xLoop: for x in minX...maxX {
-            let currentPoint: Point = Point(x: x, y: y)
-
-            let valid = points.reduce(into: 0, { (result, point) in
-                result += currentPoint.distance(to: point)
-            }) < 10000
-
-            print(valid ? "#" : ".", terminator: "")
-            count += valid ? 1 : 0
+extension Node: Comparable {
+    public static func <(lhs: Node, rhs: Node) -> Bool {
+        if rhs.isAncestor(of: lhs) {
+            print("\(rhs) < \(lhs)")
+            return false
+        } else if lhs.isAncestor(of: rhs) {
+            print("\(lhs) < \(rhs)")
+            return true
+        } else {
+            print("\(lhs) & \(rhs) are unrelated")
+            return lhs.name < rhs.name
         }
-
-        print()
     }
 
-    print(count)
-
-//    return closestPointCounts.keys.filter { !illegalPointIndexes.contains($0) }.map { closestPointCounts[$0]! }.max()!
-    return count
+    public static func ==(lhs: Node, rhs: Node) -> Bool {
+        return lhs.name == rhs.name
+    }
 }
 
-//let points = [
-//    [1, 1],
-//    [1, 6],
-//    [8, 3],
-//    [3, 4],
-//    [5, 5],
-//    [8, 9],
+extension Node: CustomStringConvertible {
+    public var description: String {
+        return name
+    }
+}
+
+func main(lines: [String]) -> String {
+    var nodeMap = [String: Node]()
+
+    for line in lines {
+        let words = line.components(separatedBy: " ")
+        let parentName = words[1]
+        let childName = words[7]
+
+        let parentNode = nodeMap[parentName] ?? Node(name: parentName)
+        let childNode = nodeMap[childName] ?? Node(name: childName)
+        parentNode.addChild(childNode)
+
+        nodeMap[parentName] = parentNode
+        nodeMap[childName] = childNode
+    }
+
+    var remainingNodes = Set<Node>(nodeMap.values)
+    let allChildren = remainingNodes.flatMap { $0.children }
+    var readyNodes = remainingNodes.filter { !allChildren.contains($0) }
+    var result = ""
+    var nextNode = readyNodes.sorted().first
+
+    while let nextNode_ = nextNode {
+        result += nextNode_.name
+        
+        readyNodes.remove(nextNode_)
+        remainingNodes.remove(nextNode_)
+        
+        let allChildren = Set<Node>(remainingNodes.flatMap { $0.children })
+
+        let kids = nextNode_.children.filter { !allChildren.contains($0) }
+
+        readyNodes.formUnion(kids)
+
+        if allChildren.contains(nextNode_) {
+            exit(1)
+        }
+        nextNode = readyNodes.sorted().first
+    }
+
+    return result
+}
+
+//let lines = [
+//    "Step C must be finished before step A can begin.",
+//    "Step C must be finished before step F can begin.",
+//    "Step A must be finished before step B can begin.",
+//    "Step A must be finished before step D can begin.",
+//    "Step B must be finished before step E can begin.",
+//    "Step D must be finished before step E can begin.",
+//    "Step F must be finished before step E can begin.",
 //]
 
-let points = [
-    [77, 279],
-    [216, 187],
-    [72, 301],
-    [183, 82],
-    [57, 170],
-    [46, 335],
-    [55, 89],
-    [71, 114],
-    [313, 358],
-    [82, 88],
-    [78, 136],
-    [339, 314],
-    [156, 281],
-    [260, 288],
-    [125, 249],
-    [150, 130],
-    [210, 271],
-    [190, 258],
-    [73, 287],
-    [187, 332],
-    [283, 353],
-    [66, 158],
-    [108, 97],
-    [237, 278],
-    [243, 160],
-    [61, 52],
-    [353, 107],
-    [260, 184],
-    [234, 321],
-    [181, 270],
-    [104, 84],
-    [290, 109],
-    [193, 342],
-    [43, 294],
-    [134, 211],
-    [50, 129],
-    [92, 112],
-    [309, 130],
-    [291, 170],
-    [89, 204],
-    [186, 177],
-    [286, 302],
-    [188, 145],
-    [40, 52],
-    [254, 292],
-    [270, 287],
-    [238, 216],
-    [299, 184],
-    [141, 264],
-    [117, 129],
-]
+let lines =
+    "Step S must be finished before step C can begin.\nStep C must be finished before step R can begin.\nStep L must be finished before step W can begin.\nStep V must be finished before step B can begin.\nStep P must be finished before step Y can begin.\nStep M must be finished before step B can begin.\nStep Y must be finished before step J can begin.\nStep W must be finished before step T can begin.\nStep N must be finished before step I can begin.\nStep H must be finished before step O can begin.\nStep O must be finished before step T can begin.\nStep Q must be finished before step X can begin.\nStep T must be finished before step K can begin.\nStep A must be finished before step D can begin.\nStep G must be finished before step K can begin.\nStep D must be finished before step X can begin.\nStep R must be finished before step J can begin.\nStep U must be finished before step B can begin.\nStep K must be finished before step J can begin.\nStep B must be finished before step J can begin.\nStep J must be finished before step E can begin.\nStep E must be finished before step Z can begin.\nStep F must be finished before step I can begin.\nStep X must be finished before step Z can begin.\nStep Z must be finished before step I can begin.\nStep E must be finished before step F can begin.\nStep R must be finished before step I can begin.\nStep L must be finished before step Z can begin.\nStep N must be finished before step O can begin.\nStep O must be finished before step D can begin.\nStep K must be finished before step I can begin.\nStep R must be finished before step F can begin.\nStep T must be finished before step F can begin.\nStep N must be finished before step G can begin.\nStep M must be finished before step D can begin.\nStep F must be finished before step X can begin.\nStep S must be finished before step D can begin.\nStep Q must be finished before step F can begin.\nStep L must be finished before step R can begin.\nStep J must be finished before step F can begin.\nStep L must be finished before step T can begin.\nStep M must be finished before step H can begin.\nStep D must be finished before step F can begin.\nStep W must be finished before step B can begin.\nStep C must be finished before step A can begin.\nStep E must be finished before step I can begin.\nStep P must be finished before step Q can begin.\nStep A must be finished before step B can begin.\nStep P must be finished before step R can begin.\nStep C must be finished before step J can begin.\nStep Y must be finished before step K can begin.\nStep C must be finished before step L can begin.\nStep E must be finished before step X can begin.\nStep X must be finished before step I can begin.\nStep A must be finished before step G can begin.\nStep M must be finished before step E can begin.\nStep C must be finished before step T can begin.\nStep C must be finished before step Y can begin.\nStep K must be finished before step E can begin.\nStep H must be finished before step D can begin.\nStep P must be finished before step K can begin.\nStep D must be finished before step R can begin.\nStep J must be finished before step X can begin.\nStep H must be finished before step Z can begin.\nStep M must be finished before step R can begin.\nStep V must be finished before step U can begin.\nStep K must be finished before step B can begin.\nStep L must be finished before step Q can begin.\nStep Y must be finished before step I can begin.\nStep T must be finished before step G can begin.\nStep U must be finished before step E can begin.\nStep S must be finished before step Q can begin.\nStep P must be finished before step G can begin.\nStep P must be finished before step M can begin.\nStep N must be finished before step J can begin.\nStep P must be finished before step O can begin.\nStep U must be finished before step J can begin.\nStep C must be finished before step N can begin.\nStep W must be finished before step R can begin.\nStep B must be finished before step Z can begin.\nStep F must be finished before step Z can begin.\nStep O must be finished before step E can begin.\nStep W must be finished before step N can begin.\nStep A must be finished before step I can begin.\nStep W must be finished before step J can begin.\nStep R must be finished before step E can begin.\nStep N must be finished before step B can begin.\nStep M must be finished before step U can begin.\nStep B must be finished before step E can begin.\nStep V must be finished before step J can begin.\nStep O must be finished before step I can begin.\nStep Q must be finished before step T can begin.\nStep Q must be finished before step U can begin.\nStep L must be finished before step V can begin.\nStep S must be finished before step Z can begin.\nStep C must be finished before step P can begin.\nStep P must be finished before step A can begin.\nStep S must be finished before step G can begin.\nStep N must be finished before step H can begin.\nStep V must be finished before step H can begin.\nStep B must be finished before step I can begin."
+        .split(separator: "\n")
+        .map(String.init)
 
-//var lines = [
-//    "[1518-11-01 00:00] Guard #10 begins shift",
-//]
-//
 //var lines = [String]()
 //
-//while let claimString = readLine(strippingNewline: true) {
-//    lines.append(claimString)
+//while let line = readLine(strippingNewline: true) {
+//    lines.append(line)
 //}
 
-print(main(points: points))
+print(main(lines: lines))
