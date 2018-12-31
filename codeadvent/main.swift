@@ -1,12 +1,12 @@
 import Foundation
 
-class Node: Hashable {
-    var hashValue: Int {
-        return name.hashValue
-    }
-
+class Node: Hashable, Named {
     let name: String
     var children = [Node]()
+
+    var duration: Int {
+        return 60 + Int(Unicode.Scalar(name)!.value - Unicode.Scalar("A")!.value + 1)
+    }
 
     init(name: String) {
         self.name = name
@@ -24,40 +24,58 @@ class Node: Hashable {
         return isParent(of: maybeChildNode) ||
                children.reduce(into: false) { result, testNode in
                    let ancestor = testNode.isAncestor(of: maybeChildNode)
-                   if ancestor {
-                       print("\(self) is ancestor of \(testNode)")
-                   }
                    result = result || ancestor
                }
+    }
+}
+
+extension Set where Element: Node {
+    var allChildren: Set<Node> {
+        return Set<Node>(flatMap { $0.children })
     }
 }
 
 extension Node: Comparable {
     public static func <(lhs: Node, rhs: Node) -> Bool {
         if rhs.isAncestor(of: lhs) {
-            print("\(rhs) < \(lhs)")
             return false
         } else if lhs.isAncestor(of: rhs) {
-            print("\(lhs) < \(rhs)")
             return true
         } else {
-            print("\(lhs) & \(rhs) are unrelated")
             return lhs.name < rhs.name
         }
     }
+}
 
-    public static func ==(lhs: Node, rhs: Node) -> Bool {
+class Worker: Hashable, Named {
+    let name: String
+    var currentNode: Node?
+    var finishTime = 0
+
+    init(_ name: String) {
+        self.name = name
+    }
+}
+
+protocol Named: CustomStringConvertible, Hashable {
+    var name: String { get }
+}
+
+extension Named {
+    public var description: String {
+        return name
+    }
+
+    var hashValue: Int {
+        return name.hashValue
+    }
+
+    public static func ==(lhs: Self, rhs: Self) -> Bool {
         return lhs.name == rhs.name
     }
 }
 
-extension Node: CustomStringConvertible {
-    public var description: String {
-        return name
-    }
-}
-
-func main(lines: [String]) -> String {
+private func parseNodes(lines: [String]) -> [String: Node] {
     var nodeMap = [String: Node]()
 
     for line in lines {
@@ -72,32 +90,58 @@ func main(lines: [String]) -> String {
         nodeMap[parentName] = parentNode
         nodeMap[childName] = childNode
     }
+    return nodeMap
+}
+
+func main(lines: [String]) -> Int {
+    var nodeMap = parseNodes(lines: lines)
 
     var remainingNodes = Set<Node>(nodeMap.values)
-    let allChildren = remainingNodes.flatMap { $0.children }
-    var readyNodes = remainingNodes.filter { !allChildren.contains($0) }
-    var result = ""
-    var nextNode = readyNodes.sorted().first
 
-    while let nextNode_ = nextNode {
-        result += nextNode_.name
-        
-        readyNodes.remove(nextNode_)
-        remainingNodes.remove(nextNode_)
-        
-        let allChildren = Set<Node>(remainingNodes.flatMap { $0.children })
+    let allWorkers = Set<Worker>((0..<5).map { Worker(String($0)) })
+    var availableWorkers = allWorkers
 
-        let kids = nextNode_.children.filter { !allChildren.contains($0) }
+    var result: Int?
 
-        readyNodes.formUnion(kids)
+    for time in 0..<Int.max {
+        for worker in allWorkers {
+            guard let node = worker.currentNode,
+                  worker.finishTime == time else {
+                continue
+            }
 
-        if allChildren.contains(nextNode_) {
-            exit(1)
+            print("\(time): \(worker) finishes \(node)")
+            remainingNodes.remove(node)
+            worker.currentNode = nil
+            availableWorkers.insert(worker)
         }
-        nextNode = readyNodes.sorted().first
+
+        if remainingNodes.isEmpty {
+            result = time
+            break
+        }
+
+        let children = remainingNodes.allChildren
+
+        for worker in availableWorkers {
+            let readyNodes = remainingNodes.filter { !children.contains($0) && !allWorkers.map { $0.currentNode }.contains($0) }
+
+            guard let nextNode = readyNodes.sorted().first else {
+                // No more tasks available
+                break
+            }
+
+            // remainingNodes.remove(nextNode)
+
+            worker.currentNode = nextNode
+            worker.finishTime = time + nextNode.duration
+            availableWorkers.remove(worker)
+
+            print("\(time): \(worker) starts \(nextNode)")
+        }
     }
 
-    return result
+    return result ?? -1
 }
 
 //let lines = [
