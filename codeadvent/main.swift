@@ -3,9 +3,26 @@ import Foundation
 let generations = 20
 
 func main(initial: String, rules: [String: String]) -> Int {
-    var startIndex = 0
+    let padding = "........................................"
+    var state = padding + initial + padding
+    print(state)
+
     for _ in 0..<generations {
+        var newState = ".."
+        for index in 2..<state.count - 2 {
+            let start = state.index(state.startIndex, offsetBy: index - 2)
+            let end = state.index(start, offsetBy: 5)
+            newState += rules[String(state[start..<end])] ?? "."
+        }
+        newState += ".."
+        print(newState)
         
+        state = newState
+    }
+
+    return state.enumerated().reduce(into: 0) { total, c in 
+        total += c.1 == "#" ?
+             c.0 - 40 : 0
     }
 }
 
@@ -24,6 +41,76 @@ func main(initial: String, rules: [String: String]) -> Int {
 //    lights.append(Point(string: line))
 //}
 
-//print(main(serialNumber: 42))
-print(main(serialNumber: 1309))
+let initial = "####....#...######.###.#...##....#.###.#.###.......###.##..##........##..#.#.#..##.##...####.#..##.#"
 
+let rules = [
+    "..#..": ".",
+    "#.#.#": "#",
+    "#.###": "#",
+    ".##..": ".",
+    "#.#..": "#",
+    ".#.#.": "#",
+    ".###.": "#",
+    ".####": "#",
+    "##...": "#",
+    "#.##.": "#",
+    "#..##": "#",
+    "....#": ".",
+    "###.#": ".",
+    "#####": "#",
+    ".....": ".",
+    "..#.#": ".",
+    ".#...": "#",
+    "##.#.": ".",
+    ".#.##": "#",
+    "..##.": ".",
+    "#...#": ".",
+    "##.##": "#",
+    "...#.": ".",
+    "#..#.": ".",
+    "..###": ".",
+    ".##.#": ".",
+    "#....": ".",
+    ".#..#": "#",
+    "####.": ".",
+    "...##": "#",
+    "##..#": ".",
+    "###..": ".",
+]
+
+//let initial = "#..#.#..##......###...###"
+//
+//let rules = [
+//    "...##": "#",
+//    "..#..": "#",
+//    ".#...": "#",
+//    ".#.#.": "#",
+//    ".#.##": "#",
+//    ".##..": "#",
+//    ".####": "#",
+//    "#.#.#": "#",
+//    "#.###": "#",
+//    "##.#.": "#",
+//    "##.##": "#",
+//    "###..": "#",
+//    "###.#": "#",
+//    "####.": "#",
+//]
+/*
+...## => #
+..#.. => #
+.#... => #
+.#.#. => #
+.#.## => #
+.##.. => #
+.#### => #
+#.#.# => #
+#.### => #
+##.#. => #
+##.## => #
+###.. => #
+###.# => #
+####. => #
+*/
+
+print(main(initial: initial, rules: rules))
