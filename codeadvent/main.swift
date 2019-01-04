@@ -1,165 +1,41 @@
 import Foundation
 
-enum Turn {
-    case left, straight, right
+class Elf {
 
-    var next: Turn {
-        switch self {
-        case .left: return .straight
-        case .straight: return .right
-        case .right: return .left
+}
+
+func main(recipes: Int, scores: (Int, Int)) -> String {
+    var index1 = 0
+    var score1 = scores.0
+    var index2 = 1
+    var score2 = scores.1
+
+    var scores = [score1, score2]
+
+    while scores.count < recipes + 10 {
+        let total = score1 + score2
+        let recipe1 = total / 10
+        let recipe2 = total % 10
+
+        if recipe1 > 0 {
+            scores.append(recipe1)
         }
+        scores.append(recipe2)
+
+        index1 += 1 + score1
+        index2 += 1 + score2
+        index1 %= scores.count
+        index2 %= scores.count
+        score1 = scores[index1]
+        score2 = scores[index2]
+
+//        print(scores)
     }
+
+    return scores.dropFirst(recipes).prefix(10).map { String($0) }.joined()
 }
 
-struct Position: Hashable, Comparable {
-    let x, y: Int
-
-    init(_ x: Int, _ y: Int) {
-        self.x = x
-        self.y = y
-    }
-    static func <(lhs: Position, rhs: Position) -> Bool {
-        return lhs.y < rhs.y ||
-               (lhs.y == rhs.y && lhs.x < rhs.x)
-    }
-
-    static func ==(lhs: Position, rhs: Position) -> Bool {
-        return lhs.x == rhs.x && lhs.y == rhs.y
-    }
-}
-
-class DirectionError: Error {
-}
-
-class Cart: Hashable {
-    private static var nextIndex = 0
-
-    let id: Int
-    var position: Position
-    var direction: Direction
-    var nextTurn = Turn.left
-
-    init(position: Position, character: Character) {
-        self.id = Cart.nextIndex
-        Cart.nextIndex += 1
-        self.position = position
-        self.direction = Direction(rawValue: character)!
-    }
-
-    func turnAtJunction(junction: Junction) throws {
-        let newDirection: Direction
-
-        switch (junction, direction) {
-        case (.slash, .north): newDirection = .east
-        case (.slash, .east): newDirection = .north
-        case (.slash, .west): newDirection = .south
-        case (.slash, .south): newDirection = .west
-        case (.backslash, .south): newDirection = .east
-        case (.backslash, .west): newDirection = .north
-        case (.backslash, .north): newDirection = .west
-        case (.backslash, .east): newDirection = .south
-        case (.junction, let d):
-            newDirection = d.turn(nextTurn)
-            nextTurn = nextTurn.next
-        }
-
-        direction = newDirection
-    }
-
-    func move() {
-//        print("\(self) moves from \(position) to ", terminator: "")
-        position = Position(position.x + direction.dx,
-                            position.y + direction.dy)
-//        print(position)
-    }
-    
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
-    }
-}
-
-extension Cart: Equatable {
-    public static func ==(lhs: Cart, rhs: Cart) -> Bool {
-        return lhs.id == rhs.id
-    }
-}
-
-enum Junction: Character, CaseIterable {
-    case slash = "/"
-    case backslash = "\\"
-    case junction = "+"
-}
-
-enum Direction: Character, CaseIterable {
-    case north = "^"
-    case south = "v"
-    case west = "<"
-    case east = ">"
-
-    func turn(_ turn: Turn) -> Direction {
-        switch (self, turn) {
-        case (.north, .right), (.south, .left), (.east, .straight): return .east
-        case (.south, .right), (.north, .left), (.west, .straight): return .west
-        case (.west, .left), (.east, .right), (.south, .straight): return .south
-        case (.east, .left), (.west, .right), (.north, .straight): return .north
-        }
-    }
-
-    var dx: Int {
-        switch self {
-        case .north, .south: return 0
-        case .west: return -1
-        case .east: return 1
-        }
-    }
-
-    var dy: Int {
-        switch self {
-        case .east, .west: return 0
-        case .north: return -1
-        case .south: return 1
-        }
-    }
-}
-
-func main(carts initialCarts: [Cart], grid: [[Junction?]]) throws -> Position {
-//    print(carts)
-//    print(grid)
-    var carts = Set<Cart>(initialCarts)
-    
-    while true {
-        var cartDictionary: [Position: [Cart]] = Dictionary(grouping: carts, by: { $0.position })
-       
-        for cart in carts.sorted(by: { $0.position < $1.position }) {
-            guard carts.contains(cart) else {
-                continue
-            }
-            
-            cart.move()
-            
-            if let crashedCart = cartDictionary[cart.position] {
-                print("crash at \(cart.position)")
-                carts.remove(crashedCart.first!)
-                carts.remove(cart)
-                continue
-            }
-            
-            cartDictionary = Dictionary(grouping: carts, by: { $0.position })
-
-            if let junction = grid[cart.position.y][cart.position.x] {
-                try cart.turnAtJunction(junction: junction)
-            }
-        }
-
-        if carts.count == 1 {
-            print(carts.first!.direction)
-            return carts.first!.position
-        }
-    }
-}
-
-let inputString = "/->-\\        \n|   |  /----\\\n| /-+--+-\\  |\n| | |  | v  |\n\\-+-/  \\-+--/\n  \\------/   "
+//let inputString = "/->-\\        \n|   |  /----\\\n| /-+--+-\\  |\n| | |  | v  |\n\\-+-/  \\-+--/\n  \\------/   "
 
 //
 //let input = inputString
@@ -170,33 +46,31 @@ let inputString = "/->-\\        \n|   |  /----\\\n| /-+--+-\\  |\n| | |  | v  |
 //var lines = [String]()
 //
 
-var width: Int
-var y = 0
-var grid = [[Junction?]]()
-
-var carts = [Cart]()
-
-while let line = readLine(strippingNewline: true) {
-    var cells = [Junction?]()
-
-    for (i, c) in line.enumerated() {
-        switch c {
-        case "<", ">", "^", "v":
-            carts.append(Cart(position: Position(i, y), character: c))
-            cells.append(nil)
-        case "/", "\\":
-            cells.append(Junction(rawValue: c))
-        case "+":
-            cells.append(.junction)
-        default:
-            cells.append(nil)
-        }
-    }
+//while let line = readLine(strippingNewline: true) {
+//    var cells = [Junction?]()
+//
+//    for (i, c) in line.enumerated() {
+//        switch c {
+//        case "<", ">", "^", "v":
+//            carts.append(Cart(position: Position(i, y), character: c))
+//            cells.append(nil)
+//        case "/", "\\":
+//            cells.append(Junction(rawValue: c))
+//        case "+":
+//            cells.append(.junction)
+//        default:
+//            cells.append(nil)
+//        }
+//    }
 //    print(line)
 //    print(cells)
 
-    grid.append(cells)
-    y += 1
-}
+//    grid.append(cells)
+//    y += 1
+//}
 
-try! print(main(carts: carts, grid: grid))
+//print(main(recipes: 9, scores: (3, 7)))
+//print(main(recipes: 5, scores: (3, 7)))
+//print(main(recipes: 18, scores: (3, 7)))
+//print(main(recipes: 2018, scores: (3, 7)))
+print(main(recipes: 327901, scores: (3, 7)))
