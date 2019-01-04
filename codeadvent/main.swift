@@ -1,9 +1,8 @@
 import Foundation
 
-class Elf {
-
+private func notFinished(scores: [Int], target: [Int]) -> Bool {
+    return Array(scores.suffix(target.count)) != target
 }
-
 func main(target t: String, scores: (Int, Int)) -> Int {
     var index1 = 0
     var score1 = scores.0
@@ -14,13 +13,16 @@ func main(target t: String, scores: (Int, Int)) -> Int {
 
     let target = t.map { Int(String($0))! }
 
-    while Array(scores.suffix(target.count)) != target {
+    while notFinished(scores: scores, target: target) {
         let total = score1 + score2
         let recipe1 = total / 10
         let recipe2 = total % 10
 
         if recipe1 > 0 {
             scores.append(recipe1)
+            guard notFinished(scores: scores, target: target) else {
+                break
+            }
         }
         scores.append(recipe2)
 
