@@ -4,7 +4,7 @@ class Elf {
 
 }
 
-func main(recipes: Int, scores: (Int, Int)) -> String {
+func main(target t: String, scores: (Int, Int)) -> Int {
     var index1 = 0
     var score1 = scores.0
     var index2 = 1
@@ -12,7 +12,9 @@ func main(recipes: Int, scores: (Int, Int)) -> String {
 
     var scores = [score1, score2]
 
-    while scores.count < recipes + 10 {
+    let target = t.map { Int(String($0))! }
+
+    while Array(scores.suffix(target.count)) != target {
         let total = score1 + score2
         let recipe1 = total / 10
         let recipe2 = total % 10
@@ -32,7 +34,7 @@ func main(recipes: Int, scores: (Int, Int)) -> String {
 //        print(scores)
     }
 
-    return scores.dropFirst(recipes).prefix(10).map { String($0) }.joined()
+    return scores.count - target.count
 }
 
 //let inputString = "/->-\\        \n|   |  /----\\\n| /-+--+-\\  |\n| | |  | v  |\n\\-+-/  \\-+--/\n  \\------/   "
@@ -69,8 +71,8 @@ func main(recipes: Int, scores: (Int, Int)) -> String {
 //    y += 1
 //}
 
-//print(main(recipes: 9, scores: (3, 7)))
-//print(main(recipes: 5, scores: (3, 7)))
-//print(main(recipes: 18, scores: (3, 7)))
-//print(main(recipes: 2018, scores: (3, 7)))
-print(main(recipes: 327901, scores: (3, 7)))
+//print(main(target: "51589", scores: (3, 7)))
+//print(main(target: "01245", scores: (3, 7)))
+//print(main(target: "92510", scores: (3, 7)))
+//print(main(target: "59414", scores: (3, 7)))
+print(main(target: "327901", scores: (3, 7)))
