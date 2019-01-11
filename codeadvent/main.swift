@@ -1,80 +1,59 @@
 import Foundation
 
-private func notFinished(scores: [Int], target: [Int]) -> Bool {
-    return Array(scores.suffix(target.count)) != target
-}
-func main(target t: String, scores: (Int, Int)) -> Int {
-    var index1 = 0
-    var score1 = scores.0
-    var index2 = 1
-    var score2 = scores.1
+func main(inputPath: String) -> Int {
+    var world = try! World(string: String(contentsOfFile: inputPath))
 
-    var scores = [score1, score2]
+    var round = -1
 
-    let target = t.map { Int(String($0))! }
+    // Go until there's only one creature type left.
+    while Dictionary(grouping: world.creatures, by: { $0.type }).keys.count > 1 {
+        print("round \(round)")
+        print(world)
+        print()
 
-    while notFinished(scores: scores, target: target) {
-        let total = score1 + score2
-        let recipe1 = total / 10
-        let recipe2 = total % 10
+        round += 1
 
-        if recipe1 > 0 {
-            scores.append(recipe1)
-            guard notFinished(scores: scores, target: target) else {
-                break
+        for creature in world.creatures.sorted(by: Comparisons.dictionaryOrder) {
+            guard creature.isAlive else { continue }
+
+            let enemies = world.creatures
+                .filter { $0.type != creature.type } // Yay bigotry!
+
+            let attackPositions = enemies
+                .flatMap { $0.position.adjacentPositions }
+
+            if !attackPositions.contains(creature.position) {
+                let reachablePositions = attackPositions.filter { world[$0].isTraversable }
+                
+                if let path = world.shortestPath(from: creature.position, to: reachablePositions) {
+                    world.move(creature: creature, on: path)
+                }
+            }
+
+            if let enemyInRange = enemies
+                .filter({ $0.inRange(of: creature) })
+                .sorted(by: Comparisons.targetDesirability)
+                .first {
+
+                enemyInRange.hitPoints -= creature.attackDamage
+
+                if enemyInRange.hitPoints < 1 {
+                    print("\(enemyInRange) has died.")
+                    world.creatures.remove(enemyInRange)
+                    world[enemyInRange.position] = .empty
+                }
             }
         }
-        scores.append(recipe2)
-
-        index1 += 1 + score1
-        index2 += 1 + score2
-        index1 %= scores.count
-        index2 %= scores.count
-        score1 = scores[index1]
-        score2 = scores[index2]
-
-//        print(scores)
     }
 
-    return scores.count - target.count
+    return round * world.creatures.reduce(into: 0, { $0 += $1.hitPoints })
 }
 
-//let inputString = "/->-\\        \n|   |  /----\\\n| /-+--+-\\  |\n| | |  | v  |\n\\-+-/  \\-+--/\n  \\------/   "
+setbuf(__stdoutp, nil)
 
-//
-//let input = inputString
-//    .split(separator: "\n")
-//    .map{Point.init(substring: $0)}
+guard CommandLine.arguments.count == 2 else {
+    print("Usage: codeadvent <input-file>")
+    exit(1)
+}
 
-//var input = [Int]()
-//var lines = [String]()
-//
-
-//while let line = readLine(strippingNewline: true) {
-//    var cells = [Junction?]()
-//
-//    for (i, c) in line.enumerated() {
-//        switch c {
-//        case "<", ">", "^", "v":
-//            carts.append(Cart(position: Position(i, y), character: c))
-//            cells.append(nil)
-//        case "/", "\\":
-//            cells.append(Junction(rawValue: c))
-//        case "+":
-//            cells.append(.junction)
-//        default:
-//            cells.append(nil)
-//        }
-//    }
-//    print(line)
-//    print(cells)
-
-//    grid.append(cells)
-//    y += 1
-//}
-
-//print(main(target: "51589", scores: (3, 7)))
-//print(main(target: "01245", scores: (3, 7)))
-//print(main(target: "92510", scores: (3, 7)))
-//print(main(target: "59414", scores: (3, 7)))
-print(main(target: "327901", scores: (3, 7)))
+print(main(inputPath: CommandLine.arguments.last!))
