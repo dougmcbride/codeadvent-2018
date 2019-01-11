@@ -39,8 +39,7 @@ func main(inputPath: String) -> Int {
 
                 if enemyInRange.hitPoints < 1 {
                     print("\(enemyInRange) has died.")
-                    world.creatures.remove(enemyInRange)
-                    world[enemyInRange.position] = .empty
+                    world.remove(creature: enemyInRange)
                 }
             }
         }
