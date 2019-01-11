@@ -25,6 +25,35 @@ struct Position: Hashable, Comparable {
     func distance(from: Position) -> Int {
         return abs(x - from.x) + abs(y - from.y)
     }
+
+    func shortestPath(to targetPositions: Array<Position>, in world: World) -> Path? {
+        if targetPositions.isEmpty {
+            return nil
+        }
+
+        var openPaths = Set<Path>([Path(start: self)])
+        var reachedPositions = Set<Position>()
+
+        repeat {
+            for path in openPaths.sorted() {
+                guard openPaths.contains(path), !reachedPositions.contains(path.end) else {
+                    openPaths.remove(path)
+                    continue
+                }
+
+                if targetPositions.contains(path.end) {
+                    return path
+                } else {
+                    openPaths.formUnion(path.possiblePaths(within: world))
+                    reachedPositions.insert(path.end)
+                }
+
+                openPaths.remove(path)
+            }
+        } while !openPaths.isEmpty
+
+        return nil
+    }
 }
 
 extension Position: CustomDebugStringConvertible {

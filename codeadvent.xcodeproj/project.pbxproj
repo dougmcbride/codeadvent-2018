@@ -9,7 +9,7 @@
 /* Begin PBXBuildFile section */
 		5D989148E699AE1C4A7B5F1E /* Path.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D989F160D93C02403DDB51F /* Path.swift */; };
 		5D9893B5C040927883B227AE /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D989FDA905A373368EFCA56 /* main.swift */; };
-		5D98968B1FE7A4EEFF6147C0 /* Comparisons.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D98986DCF837A5DE6A203FA /* Comparisons.swift */; };
+		5D98968B1FE7A4EEFF6147C0 /* Comparison.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D98986DCF837A5DE6A203FA /* Comparison.swift */; };
 		5D9896DEDA7FAA0C74591FBB /* World.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D989CD0FF0A6BFF8B3CE669 /* World.swift */; };
 		5D989B16D2C458F949D6B427 /* Position.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D989415669C88B632C16D1D /* Position.swift */; };
 		5D989C9C6A1FAD7976B45D72 /* Direction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D989184F22FAADCF342088A /* Direction.swift */; };
@@ -32,7 +32,7 @@
 /* Begin PBXFileReference section */
 		5D989184F22FAADCF342088A /* Direction.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Direction.swift; sourceTree = "<group>"; };
 		5D989415669C88B632C16D1D /* Position.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Position.swift; sourceTree = "<group>"; };
-		5D98986DCF837A5DE6A203FA /* Comparisons.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Comparisons.swift; sourceTree = "<group>"; };
+		5D98986DCF837A5DE6A203FA /* Comparison.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Comparison.swift; sourceTree = "<group>"; };
 		5D989889A1DE4C68319C34F2 /* codeadvent */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = codeadvent; sourceTree = BUILT_PRODUCTS_DIR; };
 		5D989CD0FF0A6BFF8B3CE669 /* World.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = World.swift; sourceTree = "<group>"; };
 		5D989F160D93C02403DDB51F /* Path.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Path.swift; sourceTree = "<group>"; };
@@ -62,7 +62,7 @@
 				5D989184F22FAADCF342088A /* Direction.swift */,
 				A255873221E83B91008D18AB /* Creature.swift */,
 				A255873421E83BAA008D18AB /* WorldContent.swift */,
-				5D98986DCF837A5DE6A203FA /* Comparisons.swift */,
+				5D98986DCF837A5DE6A203FA /* Comparison.swift */,
 			);
 			path = codeadvent;
 			sourceTree = "<group>";
@@ -140,7 +140,7 @@
 				5D989B16D2C458F949D6B427 /* Position.swift in Sources */,
 				5D9893B5C040927883B227AE /* main.swift in Sources */,
 				5D989C9C6A1FAD7976B45D72 /* Direction.swift in Sources */,
-				5D98968B1FE7A4EEFF6147C0 /* Comparisons.swift in Sources */,
+				5D98968B1FE7A4EEFF6147C0 /* Comparison.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

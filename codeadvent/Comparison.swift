@@ -1,9 +1,6 @@
-// Created by McBride, Doug on 2019-01-10.
-// Copyright (c) 2019 The Sneaky Frog. All rights reserved.
-
 import Foundation
 
-struct Comparisons {
+struct Comparison {
     static func dictionaryOrder(lhs: Positioned, rhs: Positioned) -> Bool {
         return lhs.position < rhs.position
     }
@@ -14,3 +11,4 @@ struct Comparisons {
             lhs.position < rhs.position
     }
 }
+

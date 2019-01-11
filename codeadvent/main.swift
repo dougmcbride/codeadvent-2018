@@ -13,7 +13,7 @@ func main(inputPath: String) -> Int {
 
         round += 1
 
-        for creature in world.creatures.sorted(by: Comparisons.dictionaryOrder) {
+        for creature in world.creatures.sorted(by: Comparison.dictionaryOrder) {
             guard creature.isAlive else { continue }
 
             let enemies = world.creatures
@@ -24,15 +24,15 @@ func main(inputPath: String) -> Int {
 
             if !attackPositions.contains(creature.position) {
                 let reachablePositions = attackPositions.filter { world[$0].isTraversable }
-                
-                if let path = world.shortestPath(from: creature.position, to: reachablePositions) {
+
+                if let path = creature.position.shortestPath(to: reachablePositions, in: world) {
                     world.move(creature: creature, on: path)
                 }
             }
 
             if let enemyInRange = enemies
                 .filter({ $0.inRange(of: creature) })
-                .sorted(by: Comparisons.targetDesirability)
+                .sorted(by: Comparison.targetDesirability)
                 .first {
 
                 enemyInRange.hitPoints -= creature.attackDamage
