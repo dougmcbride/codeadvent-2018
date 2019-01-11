@@ -48,6 +48,7 @@ func main(inputPath: String) -> Int {
     return round * world.creatures.reduce(into: 0, { $0 += $1.hitPoints })
 }
 
+// Don't buffer print() output
 setbuf(__stdoutp, nil)
 
 guard CommandLine.arguments.count == 2 else {
