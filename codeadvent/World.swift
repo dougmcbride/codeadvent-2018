@@ -42,6 +42,10 @@ struct World {
         }
     }
 
+    var creatureTypeCount: Int {
+        return Dictionary(grouping: creatures, by: { $0.type }).keys.count
+    }
+
     subscript(position: Position) -> WorldContent {
         get {
             return contents[position.y * width + position.x]

@@ -3,15 +3,12 @@ import Foundation
 func main(inputPath: String) -> Int {
     var world = try! World(string: String(contentsOfFile: inputPath))
 
-    var round = -1
+    var round = 0
 
-    // Go until there's only one creature type left.
-    while Dictionary(grouping: world.creatures, by: { $0.type }).keys.count > 1 {
+    repeat {
         print("round \(round)")
         print(world)
         print()
-
-        round += 1
 
         for creature in world.creatures.sorted(by: Comparison.dictionaryOrder) {
             guard creature.isAlive else { continue }
@@ -40,12 +37,15 @@ func main(inputPath: String) -> Int {
                 if enemyInRange.hitPoints < 1 {
                     print("\(enemyInRange) has died.")
                     world.remove(creature: enemyInRange)
+                    if world.creatureTypeCount == 1 {
+                        return round * world.creatures.reduce(into: 0, { $0 += $1.hitPoints })
+                    }
                 }
             }
         }
-    }
 
-    return round * world.creatures.reduce(into: 0, { $0 += $1.hitPoints })
+        round += 1
+    } while true
 }
 
 // Don't buffer print() output
