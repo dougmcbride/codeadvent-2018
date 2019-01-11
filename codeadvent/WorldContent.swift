@@ -17,7 +17,7 @@ enum WorldContent: Equatable {
         }
     }
 
-    var isEmpty: Bool {
+    var isTraversable: Bool {
         return self == .empty
     }
 }

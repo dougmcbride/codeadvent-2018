@@ -22,7 +22,7 @@ struct Path: Comparable, Hashable {
     func possiblePaths(within world: World) -> [Path] {
         return Direction.allCases
             .map { Path(path: self, direction: $0) }
-            .filter { world[$0.end].isEmpty }
+            .filter { world[$0.end].isTraversable }
     }
 
     init(start: Position) {
