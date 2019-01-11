@@ -52,9 +52,9 @@ struct World {
     }
 
     mutating func move(creature: Creature, on path: Path) {
-        let entity = self[creature.position]
+        let worldContent = self[creature.position]
         self[creature.position] = .empty
-        self[path.nextPosition] = entity
+        self[path.nextPosition] = worldContent
         creature.position = path.nextPosition
     }
 

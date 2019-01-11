@@ -57,6 +57,6 @@ extension Creature: CustomStringConvertible {
 
 extension Creature: CustomDebugStringConvertible {
     public var debugDescription: String {
-        return "\(id)\(representation)\(position)\(hitPoints)"
+        return "[\(id)]\(representation)\(position)\(hitPoints)"
     }
 }
