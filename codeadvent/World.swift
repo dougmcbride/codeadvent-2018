@@ -15,7 +15,7 @@ struct World {
     var creatures: Set<Creature>
 
     init(string: String) throws {
-        let rows = string.split(separator: "\n")
+        let rows = string.split(whereSeparator: { CharacterSet.whitespacesAndNewlines.contains($0.unicodeScalars.first!) })
 
         self.contents = try rows.reduce(into: [WorldContent](), { array, row in
             array.append(contentsOf: try row.trimmingCharacters(in: .whitespaces).map { (char: Character) -> WorldContent in
