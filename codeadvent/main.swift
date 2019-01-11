@@ -20,7 +20,7 @@ func main(inputPath: String) -> Int {
                 .flatMap { $0.position.adjacentPositions }
 
             if !attackPositions.contains(creature.position) {
-                let reachablePositions = attackPositions.filter { world[$0].isTraversable }
+                let reachablePositions = attackPositions.filter { world[$0].isEmpty }
 
                 if let path = creature.position.shortestPath(to: reachablePositions, in: world) {
                     world.move(creature: creature, on: path)
