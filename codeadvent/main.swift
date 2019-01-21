@@ -15,6 +15,10 @@ func main(inputPath: String) -> Int {
 
             let enemies = world.creatures
                 .filter { $0.type != creature.type } // Yay bigotry!
+            
+            if enemies.isEmpty {
+                return round * world.creatures.reduce(into: 0, { $0 += $1.hitPoints })
+            }
 
             let attackPositions = enemies
                 .flatMap { $0.position.adjacentPositions }
@@ -37,9 +41,6 @@ func main(inputPath: String) -> Int {
                 if enemyInRange.hitPoints < 1 {
                     print("\(enemyInRange) has died.")
                     world.remove(creature: enemyInRange)
-                    if world.creatureTypeCount == 1 {
-                        return round * world.creatures.reduce(into: 0, { $0 += $1.hitPoints })
-                    }
                 }
             }
         }
