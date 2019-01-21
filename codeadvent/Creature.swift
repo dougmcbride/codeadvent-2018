@@ -14,12 +14,18 @@ enum CreatureType {
 
 class Creature: Hashable, Positioned {
     static private var nextId = 1
-    
+
     let id: Int
     let type: CreatureType
     var position: Position
     var hitPoints = 200
-    let attackDamage = 3
+
+    var attackDamage: Int {
+        switch type {
+            case .elf: return 3
+            case .goblin: return 3
+        }
+    }
 
     var isAlive: Bool {
         return hitPoints > 0

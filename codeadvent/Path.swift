@@ -1,6 +1,6 @@
 import Foundation
 
-struct Path: Comparable, Hashable {
+struct Path: Comparable, Hashable, Equatable {
     let positions: [Position]
 
     var length: Int {
@@ -44,6 +44,8 @@ struct Path: Comparable, Hashable {
             }
         }
 
+//        print(lhs)
+//        print(rhs)
         return false
     }
 }

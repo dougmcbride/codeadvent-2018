@@ -4,7 +4,7 @@ protocol Positioned {
     var position: Position { get }
 }
 
-struct Position: Hashable, Comparable {
+struct Position: Hashable, Comparable, Equatable {
     let x, y: Int
 
     func move(_ direction: Direction) -> Position {
@@ -33,26 +33,37 @@ struct Position: Hashable, Comparable {
 
         var openPaths = Set<Path>([Path(start: self)])
         var reachedPositions = Set<Position>()
+        var bestPath: Path?
 
-        repeat {
+        while !openPaths.isEmpty {
             for path in openPaths.sorted() {
-                guard openPaths.contains(path), !reachedPositions.contains(path.end) else {
-                    openPaths.remove(path)
+                guard openPaths.contains(path) else {
                     continue
                 }
 
-                if targetPositions.contains(path.end) {
-                    return path
-                } else {
-                    openPaths.formUnion(path.possiblePaths(within: world))
-                    reachedPositions.insert(path.end)
+                openPaths.remove(path)
+
+                if bestPath != nil && path > bestPath! {
+                    continue
                 }
 
-                openPaths.remove(path)
-            }
-        } while !openPaths.isEmpty
+                if reachedPositions.contains(path.end) {
+                    continue
+                }
 
-        return nil
+                reachedPositions.insert(path.end)
+
+                if targetPositions.contains(path.end) {
+                    if bestPath == nil || path < bestPath! {
+                        bestPath = path
+                    }
+                } else {
+                    openPaths.formUnion(path.possiblePaths(within: world))
+                }
+            }
+        }
+
+        return bestPath
     }
 }
 
