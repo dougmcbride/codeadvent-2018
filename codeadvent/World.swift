@@ -63,6 +63,11 @@ struct World {
     }
 
     mutating func remove(creature: Creature) {
+        if creature.type == .elf {
+            print("NOPE")
+            exit(1)
+        }
+        
         self[creature.position] = .empty
         creatures.remove(creature)
     }

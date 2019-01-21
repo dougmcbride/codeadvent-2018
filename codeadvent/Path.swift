@@ -38,6 +38,10 @@ struct Path: Comparable, Hashable, Equatable {
             return lhs.length < rhs.length
         }
 
+        if lhs.end != rhs.end {
+            return lhs.end < rhs.end
+        }
+        
         for i in lhs.positions.indices {
             if lhs.positions[i] != rhs.positions[i] {
                 return lhs.positions[i] < rhs.positions[i]

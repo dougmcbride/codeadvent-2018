@@ -22,7 +22,7 @@ class Creature: Hashable, Positioned {
 
     var attackDamage: Int {
         switch type {
-            case .elf: return 3
+            case .elf: return 34
             case .goblin: return 3
         }
     }
