@@ -119,7 +119,12 @@ func main(inputPath: String) -> Int {
 
     let state = input
         .components(separatedBy: .newlines)
-        .reduce(into: State()) { $0.execute(Instruction(string: $1)) }
+        .reduce(into: State()) {
+            print($0)
+            let instruction = Instruction(string: $1)
+            print(instruction)
+            $0.execute(instruction)
+        }
 
     print(state)
     return state.reg.first!
