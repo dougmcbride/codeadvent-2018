@@ -1,41 +1,22 @@
 import Foundation
 
 enum OpCode: Int, CaseIterable {
-// (add register) stores into register C the result of adding register A and register B.
-    case addr
-
-// (add immediate) stores into register C the result of adding register A and value B.
-    case addi
-
-// (multiply register) stores into register C the result of multiplying register A and register B.
-    case mulr
-    case muli
-
-// (bitwise AND register) stores into register C the result of the bitwise AND of register A and register B.
-    case banr
-    case bani
-
-// (bitwise OR register) stores into register C the result of the bitwise OR of register A and register B.
-    case borr
-    case bori
-
-// (set register) copies the contents of register A into register C. (Input B is ignored.)
-    case setr
-    case seti
-
-// (greater-than immediate/register) sets register C to 1 if value A is greater than register B. Otherwise, register C is set to 0.
     case gtir
-    case gtri
-
-// (greater-than register/register) sets register C to 1 if register A is greater than register B. Otherwise, register C is set to 0.
+    case mulr
+    case seti
     case gtrr
-
-// (equal register/immediate) sets register C to 1 if register A is equal to value B. Otherwise, register C is set to 0.
-    case eqir
+    case bori
+    case borr
+    case banr
     case eqri
-
-// (equal register/register) sets register C to 1 if register A is equal to register B. Otherwise, register C is set to 0.
+    case bani
+    case addr
+    case addi
     case eqrr
+    case gtri
+    case eqir
+    case setr
+    case muli
 
     init(_ int: Int) {
         self = OpCode(rawValue: int)!
@@ -69,7 +50,7 @@ struct Instruction {
         return values[3]
     }
 
-    init(string: Substring) {
+    init(string: String) {
         self.values = string
             .components(separatedBy: CharacterSet.decimalDigits.inverted)
             .compactMap { Int($0) }
@@ -97,6 +78,9 @@ struct State: Equatable {
         self.reg = string
             .components(separatedBy: CharacterSet.decimalDigits.inverted)
             .compactMap { Int($0) }
+    }
+
+    init() {
     }
 
     mutating func execute(_ i: Instruction) {
@@ -130,71 +114,15 @@ struct State: Equatable {
     }
 }
 
-/*
-Before: [2, 0, 0, 1]
-15 3 1 3
-After:  [2, 0, 0, 1]
-
-Before: [3, 2, 3, 3]
-4 3 3 0
-After:  [3, 2, 3, 3]
-
-*/
-
-struct StringReader {
-    private let string: String
-    private var index: String.Index
-
-    init(_ string: String) {
-        self.string = string
-        self.index = string.startIndex
-    }
-
-    mutating func nextLine() -> Substring? {
-        guard let lineEndIndex = string
-            .range(of: "\n", range: index..<string.endIndex)?
-            .lowerBound else { return nil }
-
-        let lineString = string[index..<lineEndIndex]
-
-        index = string.index(index, offsetBy: lineString.count + 1, limitedBy: string.endIndex)!
-        return lineString
-    }
-}
-
 func main(inputPath: String) -> Int {
-    var reader = StringReader(try! String(contentsOfFile: inputPath))
-    var count = 0
+    let input = try! String(contentsOfFile: inputPath)
 
-    repeat {
-        guard let nextLine = reader.nextLine() else {
-            return count
-        }
+    let state = input
+        .components(separatedBy: .newlines)
+        .reduce(into: State()) { $0.execute(Instruction(string: $1)) }
 
-        let startState = State(string: nextLine)
-        let instruction = Instruction(string: reader.nextLine()!)
-        let endState = State(string: reader.nextLine()!)
-
-        // Skip line
-        let _ = reader.nextLine()
-
-        var matchCount = 0
-        print("start state: \(startState)")
-        for opCode in OpCode.allCases {
-            var state = startState
-            let instruction2: Instruction = instruction.with(opCode: opCode)
-            state.execute(instruction2)
-            if state == endState {
-                print(instruction2)
-                print("end state: \(state)")
-                matchCount += 1
-            }
-        }
-
-        if matchCount > 2 {
-            count += 1
-        }
-    } while true
+    print(state)
+    return state.reg.first!
 }
 
 // Don't buffer print() output
