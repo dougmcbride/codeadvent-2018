@@ -6,15 +6,13 @@ while let frequencyChangeString = readLine(strippingNewline: true) {
 
 var frequenciesSeen = Set<Int>()
 var currentFrequency = 0
+var frequencyIndex = 0
 
-for frequencyIndex in 0...Int.max {
-    if frequenciesSeen.contains(currentFrequency) {
-        break
-    }
-
+repeat {
     frequenciesSeen.insert(currentFrequency)
     currentFrequency += frequencyChanges[frequencyIndex % frequencyChanges.count]
-}
+    frequencyIndex += 1
+} while !frequenciesSeen.contains(currentFrequency) 
 
 print("answer: \(currentFrequency)")
         
